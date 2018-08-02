@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="http://127.0.0.1:8090/arcgis_js_api/library/3.21/3.21/dijit/themes/tundra/tundra.css" />
+    <link rel="stylesheet" href="http://127.0.0.1:8090/arcgis_js_api/library/3.21/3.21/esri/css/esri.css" />
+    <script type="text/javascript" src="http://127.0.0.1:8090/arcgis_js_api/library/3.21/3.21/init.js"></script>
+    <script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
+</head>
+<style>
+    #map {
+        height: 800px;
+        width: 100%;
+    }
+</style>
+
+<body>
+    <div id="map">
+
+    </div>
+</body>
+<script>
+    require(["esri/map", "extLayers/gaodeLayer"], function (Map, GaoDeLayer) {
+        var map = new Map("map", {
+            center: [112.6, 30.5],
+            zoom: 5
+        });
+        var gaode = new GaoDeLayer();
+        map.addLayer(gaode);
+
+        var clusterData = [];
+        $.get("data/data.json", function (result) {
+            //            console.log(result);
+            addClusters(result);
+        });
+        function addClusters(items) {
+            var clusterLayer = null;//距离图层
+            require(["extras/ClusterLayer", "extras/ClusterLayer2", "esri/dijit/PopupTemplate",
+                "esri/geometry/Point", "dojo/_base/array",
+                "esri/symbols/SimpleMarkerSymbol", "esri/symbols/SimpleLineSymbol",
+                "esri/symbols/SimpleFillSymbol", "esri/Color",
+                "esri/symbols/PictureMarkerSymbol",
+                "esri/renderers/ClassBreaksRenderer",
+                "esri/geometry/webMercatorUtils"
+            ], function (ClusterLayer, zoneClusterLayer, PopupTemplate, Point, arrayUtils, SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, Color, PictureMarkerSymbol, ClassBreaksRenderer, webMercatorUtils) {
+                var countyInfo = {};
+                countyInfo.data = arrayUtils.map(items, function (item) {
+                    var latlng = new Point(parseFloat(item.lon), parseFloat(item.lat), map.spatialReference);
+                    var webMercator = webMercatorUtils.geographicToWebMercator(latlng);
+                    var attributes = {
+                        "学校名": item.name,
+                        "lng": item.lon,
+                        "lat": item.lat
+                    };
+                    return {
+                        "x": webMercator.x,
+                        "y": webMercator.y,
+                        "attributes": attributes
+                    };
+                });
+                var popupTemplate = new PopupTemplate({
+                    title: "信息查看",
+                    fieldInfos: [
+                        {
+                            fieldName: "学校名",
+                            visible: true
+                        },
+                        {
+                            fieldName: "lng",
+                            visible: true
+                        }]
+                });
+                var defaultSym = new SimpleMarkerSymbol();
+
+                var picBaseUrl = "https://static.arcgis.com/images/Symbols/Shapes/";
+                var blue = new PictureMarkerSymbol(picBaseUrl + "BluePin1LargeB.png", 30, 30).setOffset(0, 15);
+                var green = new PictureMarkerSymbol(picBaseUrl + "GreenPin1LargeB.png", 45, 45).setOffset(0, 15);
+                var orange = new PictureMarkerSymbol(picBaseUrl + "OrangePin1LargeB.png", 65, 65).setOffset(0, 15);
+                var red = new PictureMarkerSymbol(picBaseUrl + "RedPin1LargeB.png", 80, 80).setOffset(0, 15);
+                var renderer = new ClassBreaksRenderer(defaultSym, "clusterCount");
+                renderer.addBreak(0, 2, blue);
+                renderer.addBreak(2, 200, green);
+                renderer.addBreak(200, 400, orange);
+                renderer.addBreak(400, 10000, red);
+                clusterLayer = new ClusterLayer({
+                    "data": countyInfo.data,
+                    "id": "clusters",
+                    "distance": 100,
+                    "labelOffset": 10,
+                    "maxSingles": 1000,//设置最大聚类点数
+                    "labelColor": "#fff",//设置图标上字的颜色
+                    "spatialReference": map.spatialReference,
+                    "singleTemplate": popupTemplate
+                });
+                clusterLayer.setRenderer(renderer);
+                map.addLayer(clusterLayer);
+            });
+        }
+    })
+</script>
+
+</html>
