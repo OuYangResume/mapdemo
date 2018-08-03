@@ -1,0 +1,157 @@
+<!doctype html> 
+<html> 
+<head> 
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />    
+    <title>天地图山东地图API－示例－轨迹移动</title> 
+      <link rel="stylesheet" href="http://www.sdmap.gov.cn/api/javascript/js/esri/css/esri.css" /> 
+     <script type="text/javascript" src="http://www.sdmap.gov.cn/api/javascript/js/init.js"></script> 
+    <script type="text/javascript"> 
+        //定义地图对象 
+        var map,graphic,moving,polylineJson,points; 
+        var startNum,endNum,isStop=false;
+        //引入天地图山东矢量图层 
+        require(["esri/map","tdlib/SDTDTLayer","esri/geometry/Extent",
+                  "esri/geometry/Point","esri/symbols/PictureMarkerSymbol",
+                  "esri/geometry/Polyline","esri/SpatialReference","esri/symbols/SimpleLineSymbol",
+                  "esri/graphic","dojo/domReady!"],
+                  function(Map,SDTDTLayer,Extent,Point,PictureMarkerSymbol,Polyline,SpatialReference,SimpleLineSymbol,Graphic){
+                  map=new Map("mapDiv",{
+                    logo:false,
+                    slider:true,
+                    nav:false,
+                    extent:new Extent({xmin:116.5,ymin:36.2,xmax:117.5,ymax:37.2,spatialReference:{wkid:4490}})
+                  });
+                  //图层初始化
+                  var sdvecLayer=new SDTDTLayer();
+                  map.addLayer(sdvecLayer);
+                  polylineJson={ 
+                		     "paths": [[[116.895, 36.6513], [116.972, 36.773], [117.089212, 36.65343], [117.466312, 36.73743],[117.081, 36.926], [116.972, 36.773]]],
+                		       //"paths": [[[119.930, 36.794], [119.961, 36.775], [120.036, 36.778]]], 
+                                 "spatialReference":{"wkid":4490}
+                               };    
+                 var polyline=new Polyline(polylineJson);
+                 var sys=new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASH,new esri.Color([0,255,0]),3);
+                 var graphic2=new Graphic(polyline,sys);
+                 map.graphics.add(graphic2); 
+                 
+                 var point=new Point(116.895, 36.6513,new SpatialReference({wkid:4490}));
+                 var pictureMarkerSymbol=new PictureMarkerSymbol("image/car.png",25,51);
+                 graphic=new Graphic(point,pictureMarkerSymbol);   
+                 map.graphics.add(graphic); 
+              document.getElementById("openTool").onclick=function(){
+           	  	if(typeof(moving)!="undefined"){
+           	     	clearInterval(moving); //清除移动 
+                }
+                points = polylineJson.paths[0]; 
+                graphic.geometry.x = points[0][0]; 
+                graphic.geometry.y = points[0][1]; 
+                map.graphics.redraw(); 
+                move(0,1);
+                document.getElementById("closeTool").disabled=false;
+                document.getElementById("continueTool").disabled=true;
+                document.getElementById("returnTool").disabled=true;
+              }; 
+              document.getElementById("closeTool").onclick = function () { 
+                  clearInterval(moving); 
+                  document.getElementById("continueTool").disabled=false;
+                  document.getElementById("returnTool").disabled=false;
+              }; 
+              document.getElementById("continueTool").onclick = function () {
+            	  if(typeof(moving)!="undefined"){
+             	     	clearInterval(moving); //清除移动 
+                  }
+            	  move(startNum,endNum);
+            	  document.getElementById("returnTool").disabled=true;
+              }; 
+              document.getElementById("returnTool").onclick = function () { 
+            	  graphic.geometry.x = points[0][0]; 
+                  graphic.geometry.y = points[0][1];
+                  graphic.symbol.angle=0;
+            	  map.graphics.redraw();
+            	  document.getElementById("continueTool").disabled=true;
+              }; 
+              
+              ///根据序列点坐标 进行移动 
+              function move(start,end){
+                var x1=points[start][0];
+                var y1=points[start][1];
+                var x2=points[end][0];
+                var y2=points[end][1];
+                
+                var p=(y2-y1)/(x2-x1);//斜率
+                var v=0.01;//距离  距离越小 位置越精确
+                moving=setInterval(function(){
+                	startNum=start; 
+                    endNum=end;
+                    if(endNum==points.length-1){
+                        document.getElementById("closeTool").disabled=true;
+                        document.getElementById("continueTool").disabled=true;
+                        document.getElementById("returnTool").disabled=false;
+                    }
+                   //分别计算 x,y轴方向速度
+                   if(Math.abs(p)==Number.POSITIVE_INFINITY){//无穷大
+                     graphic.geometry.y+=v;
+                   }
+                   else{
+                	 if(x2<x1){
+                		 graphic.geometry.x-=(1/Math.sqrt(1+p*p))*v;
+                         graphic.geometry.y-=(p / Math.sqrt(1 + p * p)) * v; 
+                         //计算汽车角度 
+                         graphic.symbol.angle =CalulateXYAnagle(x1,y1,x2,y2); //// (Math.PI / 2 - Math.atan(p)) * 180 / Math.PI+180
+                	 }
+                	 else{
+                		 graphic.geometry.x+=(1/Math.sqrt(1+p*p))*v;
+                         graphic.geometry.y+=(p / Math.sqrt(1 + p * p)) * v; 
+                         //计算汽车角度 
+                         graphic.symbol.angle =CalulateXYAnagle(x1,y1,x2,y2); ////(Math.PI / 2 - Math.atan(p)) * 180 / Math.PI
+                	 }
+                   }
+                //图层刷新 
+                map.graphics.redraw(); 
+                if (Math.abs(graphic.geometry.x - x2) <=0.01 && Math.abs(graphic.geometry.y - y2) <=0.01) {
+                    clearInterval(moving); 
+                    startNum=start++; 
+                    endNum=end++; 
+                    if (end < points.length) 
+                        move(start, end); 
+                  } 
+                }, 50);     
+             }
+             
+             function continueMove(){
+            	 
+             }
+         });
+        function CalulateXYAnagle(startx,starty,endx,endy){
+        	var tan=Math.atan(Math.abs((endy-starty)/(endx-startx)))*180/Math.PI+90;
+        	 if (endx > startx && endy > starty)//第一象限  
+             {  
+                 return -tan+180;  
+             }  
+             else if (endx > startx && endy < starty)//第二象限  
+             {  
+                 return tan;  
+             }  
+             else if (endx < startx && endy > starty)//第三象限  
+             {  
+                 return tan - 180;  
+             }  
+             else  
+             {  
+                 return - tan;  
+             }  
+        }
+    </script> 
+</head> 
+<body> 
+        <div id="mapDiv" style="position:absolute;width:100%; height:100%"> 
+            <div style="position:absolute;z-index: 1;top:10px;right:20px;border:1px blue solid">  
+                                             在地图上添加一条折线。<br /> 
+            <input type="button" id="openTool"   value="开启" /> 
+            <input type="button" id="closeTool"  value="暂停" />
+            <input type="button" id="continueTool"  disabled="disabled" value="继续" />
+            <input type="button" id="returnTool" disabled="disabled" readonly value="返回" /> 
+            </div> 
+        </div> 
+</body> 
+</html> 
