@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>空间与UI组件 - 图形信息框</title>
+  <style type="text/css">
+    html,body{margin:0px;height:100%;width:100%}
+    .container{width:100%;height:100%}
+  </style>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maptalks@0.40.5/dist/maptalks.css">
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/maptalks@0.40.5/dist/maptalks.min.js"></script>
+  <body>
+
+    <div id="map" class="container"></div>
+    <button id="yichu">移除</button>
+    <script>
+
+      var map = new maptalks.Map('map', {
+        center: [114,31],
+        zoom: 8,
+        baseLayer: new maptalks.TileLayer('base', {
+          urlTemplate: 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+          subdomains: ['a','b','c'],
+          attribution: '&copy; <a href="http://www.osm.org" target="_blank">OpenStreetMap</a> contributors'
+        })
+      });
+
+      var layer = new maptalks.VectorLayer('vector').addTo(map);
+      var marker = new maptalks.Marker(
+        [114, 31],
+        {
+          visible : true,
+          editable : true,
+          cursor : 'pointer',
+          shadowBlur : 0,
+          shadowColor : 'black',
+          draggable : false,
+          dragShadow : false, // display a shadow during dragging
+          drawOnAxis : null,  // force dragging stick on a axis, can be: x, y
+        }
+      );
+      var marker2 = new maptalks.Marker(
+        [114, 31.2]
+      );
+      layer.addGeometry([marker,marker2]);
+      marker2.setInfoWindow({
+        'title'     : 'Marker\'s InfoWindow',
+        'content'   : 'Click on marker to open.',
+        'autoPan': true,
+        'width': 500,
+        'minHeight': 120,
+        'custom': false,
+        'autoOpenOn' : 'click',  //set to null if not to open when clicking on marker
+        'autoCloseOn' : 'click'
+      });
+      marker2.openInfoWindow();
+      
+      var removeButon= document.getElementById("yichu");
+      removeButon.onclick= function(){
+        map.removeLayer(vector);
+
+      }
+
+    </script>
+  </body>
+</html>

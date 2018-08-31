@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>地图 - 显示</title>
+<style type="text/css">
+    html,
+    body {
+        margin: 0px;
+        height: 100%;
+        width: 100%
+    }
+
+    .container {
+        width: 100%;
+        height: 100%
+    }
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maptalks@0.40.5/dist/maptalks.css">
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/maptalks@0.40.5/dist/maptalks.min.js"></script>
+
+<body>
+
+    <div id="map" class="container"></div>
+
+    <script>
+        var map = new maptalks.Map('map', {
+            center: [112, 31.5],
+            zoom: 8,
+            baseLayer: new maptalks.TileLayer('base', {
+                urlTemplate: 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                subdomains: ['a', 'b', 'c'],
+                attribution: '&copy; <a href="http://www.osm.org" target="_blank">OpenStreetMap</a> contributors'
+            })
+        });
+        var wmsLayer = new maptalks.WMSTileLayer('wms', {
+            'urlTemplate': 'http://120.77.215.143:6080/arcgis/services/xiangyang/xiangyang/MapServer/WMSServer/wms',
+            'version': '1.3.0',
+            'format': 'image/png',
+            'transparent': true,
+            'renderer':'canvas',
+            'uppercase': true,
+            'layers':'0'
+        });
+        map.addLayer(wmsLayer);       
+    </script>
+</body>
+
+</html>
