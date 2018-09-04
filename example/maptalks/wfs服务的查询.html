@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>地图 - 显示</title>
+<style type="text/css">
+    html,
+    body {
+        margin: 0px;
+        height: 100%;
+        width: 100%
+    }
+
+    .container {
+        width: 100%;
+        height: 100%
+    }
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maptalks@0.40.5/dist/maptalks.css">
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/maptalks@0.40.5/dist/maptalks.min.js"></script>
+<script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.js"></script>
+<script src="./js/maptalks.featureLayer.oouyang.js"></script>
+
+<body>
+
+    <div id="map" class="container"></div>
+
+    <script>
+        var map = new maptalks.Map('map', {
+            center: [112, 31.5],
+            zoom: 8,
+            baseLayer: new maptalks.TileLayer('base', {
+                urlTemplate: 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                subdomains: ['a', 'b', 'c'],
+                attribution: '&copy; <a href="http://www.osm.org" target="_blank">OpenStreetMap</a> contributors'
+            })
+        });
+
+        var wmsLayer = new maptalks.WMSTileLayer('wms', {
+            'urlTemplate': 'http://120.77.215.143:6080/arcgis/services/xiangyang/xiangyang/MapServer/WMSServer/wms',
+            'version': '1.3.0',
+            'format': 'image/png',
+            'transparent': true,
+            'renderer': 'canvas',
+            'uppercase': true,
+            'layers': '0'
+        });
+        var layer = new maptalks.VectorLayer('vector');
+       // map.addLayer(layer);
+        map.addLayer(wmsLayer);
+        //postDataFrom("http://120.77.215.143:6080/arcgis/rest/services/xiangyang/xiangyang/MapServer/0");
+
+    </script>
+
+
+    <script>
+        var drawLayer = new maptalks.VectorLayer("drawLayer");//绘画图层
+        map.addLayer(drawLayer)
+        var drawTool = new maptalks.DrawTool({
+            symbol: {
+                lineColor: "#f00",
+                polygonFill: "#0f0",
+                polygonOpacity: 0.6
+            },
+            mode: 'Polygon'
+        }).addTo(map).enable();
+        drawTool.on('drawstart', function () {
+            layer.clear();
+        })
+
+        drawTool.on('drawend', function (param) {
+            console.log(param);
+            layer.addGeometry(param.geometry);
+            var coords = param.geometry.getCoordinates()[0];
+            var coordinates = [];
+            coords.forEach(function (c) {
+                coordinates.push([c.x, c.y]);
+            });
+            var inputGeometry = {
+                "rings": [coordinates],
+                "spatialReference": { 'wkid': 4326 }
+            }
+            QueryTask('http://120.77.215.143:6080/arcgis/rest/services/xiangyang/xiangyang/MapServer/0', {
+                // geometry: inputGeometry, 
+                where: "type = '八一泵站'",
+                geometryType: "esriGeometryPolygon"
+            });
+        });
+
+        function QueryTask(url, option) {
+            var filter = parseQueryString(option);
+            var url = url + filter;
+            $.ajax({
+                url: url,
+                async: false,
+                dataType: 'jsonp',
+                success: function (res) {
+                    console.log(res);//打印出查询结果
+                },
+                error: function (b) {
+
+                }
+            })
+        }
+        //拼接查询参数
+        function parseQueryString(option) {
+            var queryString = '/query?';
+            var geometry = option.geometry || '';
+            var condition = {
+                where: option.where || '1=1',
+                geometry: geometry instanceof Object ? JSON.stringify(geometry) : geometry,
+                geometryType: option.geometryType || 'esriGeometryPoint',
+                inSR: option.inSR || '',
+                spatialRel: option.esriSpatialRelIntersects || 'esriSpatialRelIntersects',
+                relationParam: option.relationParam || '',
+                objectIds: option.objectIds || '',
+                time: option.time || '',
+                returnCountOnly: option.returnCountOnly || false,
+                returnGeometry: option.returnGeometry || true,
+                maxAllowableOffset: option.maxAllowableOffset || '',
+                outSR: option.outSR || '',
+                text: option.text || '',
+                outFields: option.outFields || '*'
+            };
+            for (var p in condition) {
+                queryString += "&" + p + "=" + condition[p];
+            }
+            queryString += "&f=pjson";
+            return queryString;
+        };
+    </script>
+</body>
+
+</html>

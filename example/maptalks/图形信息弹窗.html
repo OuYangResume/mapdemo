@@ -46,19 +46,12 @@
       marker2.setInfoWindow({
         'title'     : 'Marker\'s InfoWindow',
         'content'   : 'Click on marker to open.',
-        'autoPan': true,
-        'width': 500,
-        'minHeight': 120,
-        'custom': false,
-        'autoOpenOn' : 'click',  //set to null if not to open when clicking on marker
-        'autoCloseOn' : 'click'
       });
-      marker2.openInfoWindow();
+   
       
       var removeButon= document.getElementById("yichu");
       removeButon.onclick= function(){
         map.removeLayer(vector);
-
       }
 
     </script>
