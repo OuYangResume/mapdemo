@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset='utf-8' />
+    <title>Add a WMS source</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.48.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.48.0/mapbox-gl.css' rel='stylesheet' />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id='map'></div>
+    <script>
+        mapboxgl.accessToken = 'pk.eyJ1Ijoib3V5YW5nYm8iLCJhIjoiY2pjMWg4aTlsMDI5aDJ3bno4cmNxMzF6NSJ9.WMvxZlMQXZp8nY6slMe1nA';
+        var map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/light-v9',
+            zoom: 6,
+            center: [112, 31.5]
+        });
+
+        map.on('load', function () {
+
+            map.addLayer({
+                'id': 'wms-test-layer',
+                'type': 'raster',
+                'source': {
+                    'type': 'raster',
+                    'tiles': [
+                     'https://geodata.state.nj.us/imagerywms/Natural2015?bbox={bbox-epsg-3857}&format=image/png&service=WMS&version=1.1.1&request=GetMap&srs=EPSG:3857&transparent=true&width=256&height=256&layers=Natural2015',
+                        //'http://120.77.215.143:6080/arcgis/services/xiangyang/xiangyang/MapServer/WMSServer/wms?format=image/png&service=WMS&version=1.1.1&request=GetMap&srs=EPSG:3857&transparent=true&width=256&height=256&layers=0'
+                    ],
+                    'tileSize': 256
+                },
+                'paint': {}
+            }, 'aeroway-taxiway');
+        });
+    </script>
+
+</body>
+
+</html>

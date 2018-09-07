@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8' />
+    <title>Display a map</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.48.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.48.0/mapbox-gl.css' rel='stylesheet' />
+    <style>
+        body { margin:0; padding:0; }
+        #map { position:absolute; top:0; bottom:0; width:100%; }
+    </style>
+</head>
+<body>
+
+<div id='map'></div>
+<script>
+mapboxgl.accessToken = 'pk.eyJ1Ijoib3V5YW5nYm8iLCJhIjoiY2pjMWg4aTlsMDI5aDJ3bno4cmNxMzF6NSJ9.WMvxZlMQXZp8nY6slMe1nA';
+var map = new mapboxgl.Map({
+    container: 'map', // container id
+    center: [-74.50, 40], // starting position [lng, lat]
+    zoom: 9 // starting zoom
+});
+
+
+map.addLayer({
+                'id': 'ArcGIS_WMTS',
+                'type': 'raster',//这里要用raster ，因为切片得到的是图片
+                'source': {
+                    'type': 'raster',//切片地图使用png 所以这里设置为raster
+
+                    'tiles': [
+
+//切片服务的地址,这里可以使用数组的形式，最终呈现效果是各个服务的叠加，z是切片的层级、x是切片的列，y是切片的行
+
+//模板  
+
+//http://地图服务地址/WMTS/tile/1.0.0/sfsd/{Style}/{TileMatrixSet}/{TileMatrix}/{TileRow}/{TileCol}.png
+
+//  kvp 方式
+//"http://地图服务地址/WMTS
+
+//?REQUEST=GetTile&SERVICE=WMTS&VERSION=1.0.0&LAYER=tttyt&STYLE=default
+
+//&TILEMATRIXSET=GoogleMapsCompatible&TILEMATRIX=z&TILEROW=y&TILECOL=x"                        
+
+//restfull方式
+
+'http://192.168.1.252:6080/arcgis/rest/services/NSKSJ/DLG_ZQ_NS/MapServer/tile/{z}/{y}/{x}'
+
+],
+//切片的图片大小
+'tileSize': 256,
+//切片请求的范围，不在这个范围的话  就不进行切片请求
+"bounds": [106.61304, -85, 120, 85]
+},
+ });
+</script>
+
+</body>
+</html>
