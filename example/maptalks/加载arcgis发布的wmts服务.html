@@ -59,21 +59,68 @@
         baseLayer: new maptalks.TileLayer("tile", {
             tileSystem: [1, -1, -400, 400],
             urlTemplate: 'http://192.168.1.252:6080/arcgis/rest/services/NSKSJ/DLG_ZQ_NS/MapServer/tile/{z}/{y}/{x}',
-            subdomains: ['0','1', '2', '3', '4', '5','6','7','8','9','10']
+            subdomains: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
         })
     });
     var layer = new maptalks.VectorLayer('vector').addTo(map);
 
-    var dingwei= $("#position").on("click",function(){
-     var hearld =  map.addEventListener("click", function (e) {
-        layer.clear();
-        var marker = new maptalks.Marker( [e.coordinate.x, e.coordinate.y],{
-            'draggable' : true,
-        });
-        layer.addGeometry(marker);
+    var dingwei = $("#position").on("click", function () {
+        map.addEventListener("click",handler)
+        function handler (e) {
+            layer.clear();
+            var lng=114.057242048;
+            var lat=22.528407075;
+            var lng1 = e.coordinate.x;
+            var lat1 = e.coordinate.y;
+            var marker = new maptalks.Marker([lng1, lat1], {
+                //  'draggable': true,
+            });
+            layer.addGeometry(marker);
+
+
+            var dsl = "{\"size\":1,\"query\":{\"nested\":{\"path\":\"qu\",\"query\":{\"constant_score\":{\"filter\":{\"bool\":{\"must\":[{\"geo_shape\":{\"qu.areainfo\":{\"relation\":\"intersects\",\"shape\":{\"type\":\"point\",\"coordinates\":["+lng+","+lat+"]}}}}]}}}}}}}";
+            $.ajax({
+                type: "post",
+                url: "http://192.168.1.191:9999/cubeData/api/getPostInfo",
+                dataType: 'json',
+                data: {
+                    "format": "raw",
+                    "index": "ksj_all",
+                    "type": "ksj_all",
+                    "param": dsl
+                },
+                success: function (e) {
+                    var data=e.hits.hits[0]._source;
+                    console.log(data);
+                    var cityId=data.shidm;//市id 27
+                    var city= data.shi[0].areaname //所属市 28
+                    var districtId=data.qudm //区id 29
+                    var district= data.qu[0].areaname //所属区
+                    var streetId = data.jddm //街道id
+                    var street=data.jd[0].areaname //所属街道
+                    var communityId =data.sqdm //社区id
+                    var community = data.sq[0].areaname //社区名
+                    var gridCode =data.wgdm    //网格编码
+                    var gridName= data.wg[0].areaname //所属网格
+                    var zrGridCode=null //责任网格编码 37-------暂无
+                    var zrGridName=null //责任网格 38------暂无
+                    var buildingCode =data.lddm //楼栋编码
+                    var buildingName =data.ld //楼栋名
+                    var roomCode =data.fwdm //房屋编码 41
+                    var roomName =data.fw //房屋名称 42
+                    var standardAddressCode =data.fwdm //统一地址编码 43
+                    var  standardAddress =data.bzdz //统一地址名称 44
+                    map.removeEventListener("click",handler); //移除监听
+                },
+                error: function () {
+                    console.log("请求数据失败"+e);
+                }
+            });
+        };
+      // map.removeEventListener("click",handler);
     })
-    })
-   
+
+
 </script>
 
 </html>

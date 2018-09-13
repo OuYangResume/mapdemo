@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Arcgis瓦片地图服务</title>
+    <meta charset="utf-8" />
+    <style type="text/css">
+        html,
+        body {
+            margin: 0px;
+            height: 100%;
+            width: 100%;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maptalks@0.40.5/dist/maptalks.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/maptalks@0.40.5/dist/maptalks.min.js"></script>
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="js/coordtranform.js"></script>
+</head>
+
+<body>
+    <div id="map"></div>
+    <input type="text" id="selectInfo" /> <button id="select">查询</button>
+    <button id="position">定位</button>
+</body>
+<script type="text/javascript">
+    var map = new maptalks.Map("map", {
+        center: [113.89337825110185, 22.638159552533807],
+        zoom: 5,
+        minZoom: 1,
+        maxZoom: 11,
+        view: {
+            projection: 'EPSG:4490',
+            resolutions: [
+                0.0013732910156250004,
+                6.866455078125002E-4,
+                3.433227539062501E-4,
+                1.7166137695312505E-4,
+                8.583068847656253E-5,
+                4.2915344238281264E-5,
+                2.1457672119140632E-5,
+                1.0728836059570316E-5,
+                5.364418029785158E-6,
+                2.682209014892579E-6,
+                1.3411045074462895E-6
+            ],
+            fullExtent: {
+                'top': 90,
+                'bottom': 0,
+                'left': 0,
+                'right': 180
+            }
+        },
+        baseLayer: new maptalks.TileLayer("tile", {
+            tileSystem: [1, -1, -400, 400],
+            urlTemplate: 'http://192.168.1.252:6080/arcgis/rest/services/NSKSJ/DLG_ZQ_NS/MapServer/tile/{z}/{y}/{x}',
+            subdomains: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
+        })
+    });
+    var layer = new maptalks.VectorLayer('vector').addTo(map);
+
+    var dingwei = $("#position").on("click", function () {
+        var hearld = map.addEventListener("click", function (e) {
+            layer.clear();
+            var lng = e.coordinate.x;
+            var lat = e.coordinate.y;
+            var marker = new maptalks.Marker([lng, lat], {
+                'draggable': true,
+            });
+            layer.addGeometry(marker);
+        })
+    })
+
+    var aa = document.getElementById("selectInfo").value;
+    $("#select").on("click", function () {
+        var data = {
+            key: "db73a195d17d067eb692a48f5376e5f9",
+            city: "440300",
+            keywords: "海上世界"
+        }
+        axios({
+            method: 'get',
+            params: data,
+            url: "https://restapi.amap.com/v3/place/text"
+        })
+            .then(res => {
+                if (res.data.status == 1 && res.data.pois.length > 0) {
+                    var coord = res.data.pois[1].location;
+                    var lng = parseFloat(coord.split(",")[0]);
+                    var lat = parseFloat(coord.split(",")[1]);
+                    console.log(coord);
+                    //国测局坐标转wgs84坐标
+                    var wgs84 = coordtransform.gcj02towgs84(lng, lat);
+                    console.log(wgs84);
+                    var marker1 = new maptalks.Marker(wgs84, {});
+                    layer.addGeometry(marker1);
+                }
+                else{
+                    alert("南山区目前没有该兴趣点！")
+                }
+            })
+            .catch(error => {
+                console.log("请求失败")
+            })
+    })
+</script>
+
+</html>
