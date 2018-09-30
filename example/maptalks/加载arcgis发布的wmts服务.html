@@ -58,7 +58,7 @@
         },
         baseLayer: new maptalks.TileLayer("tile", {
             tileSystem: [1, -1, -400, 400],
-            urlTemplate: 'http://192.168.1.252:6080/arcgis/rest/services/NSKSJ/DLG_ZQ_NS/MapServer/tile/{z}/{y}/{x}',
+            urlTemplate: 'http://10.200.66.17:6080/arcgis/rest/services/NSKSJ/DLG_ZQ_NS/MapServer/tile/{z}/{y}/{x}',
             subdomains: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
         })
     });
@@ -76,12 +76,12 @@
                 //  'draggable': true,
             });
             layer.addGeometry(marker);
-
+            map.removeEventListener("click",handler); //移除监听
 
             var dsl = "{\"size\":1,\"query\":{\"nested\":{\"path\":\"qu\",\"query\":{\"constant_score\":{\"filter\":{\"bool\":{\"must\":[{\"geo_shape\":{\"qu.areainfo\":{\"relation\":\"intersects\",\"shape\":{\"type\":\"point\",\"coordinates\":["+lng+","+lat+"]}}}}]}}}}}}}";
             $.ajax({
                 type: "post",
-                url: "http://192.168.1.191:9999/cubeData/api/getPostInfo",
+                url: "http://10.200.66.39:9999/cubeData/api/getPostInfo",
                 dataType: 'json',
                 data: {
                     "format": "raw",
@@ -90,8 +90,9 @@
                     "param": dsl
                 },
                 success: function (e) {
+                    console.log(e);
                     var data=e.hits.hits[0]._source;
-                    console.log(data);
+                    
                     var cityId=data.shidm;//市id 27
                     var city= data.shi[0].areaname //所属市 28
                     var districtId=data.qudm //区id 29
@@ -110,7 +111,6 @@
                     var roomName =data.fw //房屋名称 42
                     var standardAddressCode =data.fwdm //统一地址编码 43
                     var  standardAddress =data.bzdz //统一地址名称 44
-                    map.removeEventListener("click",handler); //移除监听
                 },
                 error: function () {
                     console.log("请求数据失败"+e);

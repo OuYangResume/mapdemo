@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+
+<body>
+
+</body>
+<script>
+    function isType(content, type, fn) {
+        // 类型判断
+        let t = Object.prototype.toString
+            .call(content, type)
+            .replace(/\[object\s|\]/g, '')
+
+        // 判断完成后，执行传入的callback函数
+        fn(type, t)
+    }
+    isType('hello swr', 'String', function (type, t) { // 作为参数传入的函数，接收isType函数内的fn中type和t这两个参数
+        console.log(type === t) // true
+    })
+
+
+
+
+    let promise = new Promise(function (resolve, reject) {
+        console.log('1')
+        reject() // 更改pending状态为resolved
+    }).then(
+        () => {
+            console.log('success1')
+        },
+        () => {
+            console.log('error1')
+            reject()
+        }).then(
+            () => {
+                console.log('success2')
+            },
+            () => {
+                console.log('error2')
+                getObjectData();
+            })
+    promise.then(
+        () => {
+            console.log('success3')
+            getObjectData();
+        },
+        () => {
+            console.log('error3')
+        })
+    console.log('2')
+
+    
+    function getObjectData() {
+        var object = {
+            name: "ouyangbo",
+            age: 16
+        }
+        var newObject = {
+            password: "123456789",
+            ...object,
+            six: "男"
+        }
+
+        console.log(newObject);
+
+    }
+
+
+
+
+
+    // // 回调函数
+    // let fs = require('fs')
+    // fs.readFile('./a.txt', 'utf8', (err, data) => { // 往fs.readFile方法传递了第三个为函数的参数
+    //     if (err) {
+    //         console.log(err)
+    //         return
+    //     }
+    //     console.log(data)
+    // })
+
+    // // 改写为Promise
+    // let fs = require('fs')
+    // function read(filePath, encoding) {
+    //     return new Promise((resolve, reject) => {
+    //         fs.readFile(filePath, encoding, (err, data) => {
+    //             if (err) reject(err)
+    //             resolve()
+    //         })
+    //     })
+    // }
+
+    // read('./a.txt', 'utf8').then((data) => { // 在这里则不再需要传回调函数进去，而是采用then来达到链式调用
+    //     console.log(data)
+    // }, (err) => {
+    //     console.log(err)
+    // })
+
+    // // 这样看好像Promise也没什么优势，那么接下来我们对比一下
+    // // 假设有3个文件
+    // // - 1.txt    文本内容为'2.txt'
+    // // - 2.txt    文本内容为'3.txt'
+    // // - 3.txt    文本内容为'hello swr'
+
+    // // 用回调函数
+    // fs.readFile('./1.txt', 'utf8', (err, data) => {
+    //     fs.readFile(data, 'utf8', (err, data) => {
+    //         fs.readFile(data, 'utf8', (err, data) => {
+    //             console.log(data) // hello swr
+    //         })
+    //     })
+    // })
+
+    // // 用Promise
+    // read('./1.txt', 'utf8')
+    //     .then((data) => {
+    //         // 1.如果一个promise执行完后，返回的还是一个promise，
+    //         //   会把这个promise的执行结果会传递给下一次then中
+    //         return read(data, 'utf8')
+    //     })
+    //     .then((data) => {
+    //         return read(data, 'utf8')
+    //     })
+    //     .then((data) => {
+    //         // 2.如果在then中返回的不是一个promise，
+    //         //   而是一个普通值，会将这个普通值作为下次then的成功的结果
+    //         return data.split('').reverse().join('')
+    //     })
+    //     .then((data) => {
+    //         console.log(data) // rws olleh
+    //         // 3.如果当前then中失败了，会走下一个then的失败回调
+    //         throw new Error('出错')
+    //     })
+    //     .then(null, (err) => {
+    //         console.log(err) // Error:出错   报错了
+    //         // 4.如果在then中不返回值，虽然没有显式返回，
+    //         //   但是默认是返回undefined，是属于普通值，依然会把这个普通值传到
+    //         //   下一个then的成功回调中
+    //     })
+    //     .then((data) => {
+    //         console.log(data) // undefined
+    //     })
+
+</script>
+
+</html>
