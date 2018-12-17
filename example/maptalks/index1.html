@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8' />
+    <title>天津坐标点拾取</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maptalks@0.40.5/dist/maptalks.css">
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/maptalks@0.40.5/dist/maptalks.min.js"></script>
+    <style>
+        body { margin:0; padding:0; }
+        #map { position:absolute; top:0; bottom:0; width:100%; }
+    </style>
+</head>
+<body>
+
+    <div id="map" class="container"></div>
+<script>
+    var arcUrl = 'http://demo-dx.geostar.com.cn:22080/arcgis/rest/services/XiyingmenMapOpen/MapServer';
+    var map ;
+    maptalks.SpatialReference.loadArcgis(arcUrl + '?f=pjson', function (err, conf) {
+      if (err) {
+        throw new Error(err);
+      }
+      console.log(conf);
+      var ref = conf.spatialReference;
+      ref.projection = 'EPSG:4326';
+       map = new maptalks.Map('map', {
+        //center: [121, 0],
+        zoom: 7,
+        maxZoom : 16,
+        center:[117.09983988902042,39.155522719249454],
+        spatialReference : ref,
+        baseLayer: new maptalks.TileLayer('base', {
+          'tileSystem' : conf.tileSystem,
+          'tileSize' : conf.tileSize, // [512, 512]
+          'urlTemplate' : arcUrl + '/tile/{z}/{y}/{x}',
+          'attribution' : '&copy; <a target="_blank" href="' + arcUrl + '"">ArcGIS</a>',
+          'renderer':'canvas',
+          'repeatWorld': 'false',
+        })
+      });
+        var wmslayer = new maptalks.WMSTileLayer('wms', {
+            'urlTemplate' : 'http://demo-dx.geostar.com.cn:22080/arcgis/services/tianjin/houseWMS/MapServer/WmsServer/wms',
+            'crs' : 'EPSG:4326',
+            'layers' : '0',
+            'styles' : '',
+            'version' : '1.3.0',
+            'renderer':'canvas',
+            'format': 'image/png',
+            'transparent' : true,
+            'uppercase' : true
+        });
+        wmslayer.addTo(map);
+        
+    });
+
+
+  </script>
+
+</body>
+</html>

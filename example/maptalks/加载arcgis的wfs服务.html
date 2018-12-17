@@ -15,6 +15,9 @@
         width: 100%;
         height: 100%
     }
+    .head{
+        color: rebeccapurple;
+    }
 </style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maptalks@0.40.5/dist/maptalks.css">
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/maptalks@0.40.5/dist/maptalks.min.js"></script>
@@ -180,11 +183,37 @@
         //添加信息框
         function setInfoWindow(geo) {
             var attri = geo.attributes;
-            var content = '<table class="infoWin" cellspacing="5" id="infoWin">';
-            for (var p in attri) {
-                content += '<tr><td>' + p + '</td><td>：' + attri[p] + '</td></tr>';
-            }
-            content += '</table>';
+            // var content = '<table class="infoWin" cellspacing="5" id="infoWin">';
+            // for (var p in attri) {
+            //     content += '<tr><td>' + p + '</td><td>：' + attri[p] + '</td></tr>';
+            // }
+            // content += '</table>';
+                console.log(geo)
+                console.log(attri);
+            // var content =
+            //     '<div class="mapinfowin">' +
+            //     '<div class="head">' +
+            //     attri.NAME +
+            //     '<div class="close">X</div>' +
+            //     "</div>" +
+            //     '<div class="main">' +
+            //     '<div class="left">' +
+            //     '<div class="title">人口总数</div>' +
+            //     '<div class="number">38410</div>' +
+            //     '<div class="title">诉求数</div>' +
+            //     '<div class="number">379</div>' +
+            //     "</div>" +
+            //     '<div class="left">' +
+            //     '<div class="title">万人投诉率</div>' +
+            //     '<div class="number">11.23%</div>' +
+            //     '<div class="title">主要投诉</div>' +
+            //     '<div class="number">噪音污染</div>' +
+            //     "</div>" +
+            //     "</div>" +
+            //     "</div>";
+
+            var content =`<div class="mapinfowin">${attri.NAME}</div><div class="head">${attri.NAME}asd
+            </div>`;
             var options = {
                 'title': '属性信息',
                 'content': content
