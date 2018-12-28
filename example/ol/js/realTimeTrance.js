@@ -48,7 +48,7 @@ realTimeTrance.prototype={
             source: this._vecSource
         });
         if(!this._map){
-            alert("³ö´í£¡Î´½«¶¨Òåmap²ÎÊý£¡");
+            alert("ï¿½ï¿½ï¿½ï¿½Î´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½mapï¿½ï¿½ï¿½ï¿½ï¿½ï¿½");
             return;
         }
         this._map.addLayer(this._vecLayer);
@@ -185,7 +185,7 @@ Path_Animation.prototype= {
         var distance = this.getDistance(startPoint, endPoint, true);
         //var insertPointLength = Math.ceil(distance / (speed));
         var insertPointLength =speed;
-        //¼ÆËãÁ½µã±»¾ù·ÖºóµÄÖµ
+        //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ã±»ï¿½ï¿½ï¿½Öºï¿½ï¿½Öµ
         var Dx = (endPoint[0] - startPoint[0]) / insertPointLength;
         var Dy = (endPoint[1] - startPoint[1]) / insertPointLength;
         var points = [startPoint];
@@ -246,7 +246,7 @@ Path_Animation.prototype= {
     suspended:function(){
         this.isOpen=false;
     },
-    //Í¼±êÐý×ª
+    //Í¼ï¿½ï¿½ï¿½ï¿½×ª
     IconRotation:function(Angle){
         if(this.Icon)
             this.Icon.setRotation(Angle)

@@ -57,7 +57,7 @@
             }
         },
         baseLayer: new maptalks.TileLayer("tile", {
-            tileSystem: [1, -1, -400, 400],
+            tileSystem: [1, -1, -400, 400], //切片原点坐标
             urlTemplate: 'http://10.200.66.17:6080/arcgis/rest/services/NSKSJ/DLG_ZQ_NS/MapServer/tile/{z}/{y}/{x}',
             subdomains: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
         })
